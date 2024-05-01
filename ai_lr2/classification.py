@@ -119,22 +119,6 @@ pixel_vectors = annotation_data['Pixel Vector'].values
 labels = annotation_data['Class Label'].values
 
 
-# # Преобразование векторов пикселей в массивы Numpy
-# pixel_matrices = []
-# for pixel_vector in pixel_vectors:
-#     pixel_matrix = np.array([int(x) for x in pixel_vector.split()])
-#     pixel_matrices.append(pixel_matrix)
-
-# # Преобразование меток классов в формат One-Hot Encoding
-# num_classes = len(np.unique(labels))
-# one_hot_labels = np.eye(num_classes)[labels]
-
-# # Преобразование векторов пикселей в массивы Numpy
-# pixel_matrices = np.array([np.array([int(pixel) for pixel in vector.split(',')]) for vector in pixel_vectors])
-
-# # Преобразование меток классов в формат One-Hot Encoding
-# num_classes = len(np.unique(labels))
-# one_hot_labels = np.eye(num_classes)[labels]
 # Преобразование меток классов в уникальные целочисленные идентификаторы
 label_to_id = {label: idx for idx, label in enumerate(np.unique(labels))}
 id_to_label = {idx: label for label, idx in label_to_id.items()}
@@ -173,13 +157,7 @@ val_loss, val_accuracy = nn.evaluate(X_val, y_val)
 print("Оценка производительности на тестовом наборе:")
 test_loss, test_accuracy = nn.evaluate(X_test, y_test)
 
-# # Оценка производительности на валидационном наборе
-# val_loss = np.mean(np.square(y_val - nn.forward(X_val)))
-# print(f"Validation Loss: {val_loss}")
 
-# # Оценка производительности на тестовом наборе
-# test_loss = np.mean(np.square(y_test - nn.forward(X_test)))
-# print(f"Test Loss: {test_loss}")
 
 
 
