@@ -24,7 +24,7 @@ class NeuralNetwork:
         self.bias_input_hidden = np.zeros((1, self.hidden_size))
         self.bias_hidden_output = np.zeros((1, self.output_size))
         
-        # Добавляем переменные для хранения метрик
+        # Метрики
         self.accuracy = 0
         self.total_samples = 0
         self.correct_predictions = 0
@@ -79,7 +79,20 @@ class NeuralNetwork:
         
         # Вывод графиков
         self.plot_loss_accuracy()
-                
+    
+    def evaluate(self, X, y):
+        predictions = self.forward(X)
+        loss = np.mean(np.square(y - predictions))
+        
+        # Расчет accuracy
+        correct_predictions = np.sum(np.argmax(predictions, axis=1) == np.argmax(y, axis=1))
+        total_predictions = len(y)
+        accuracy = correct_predictions / total_predictions
+        
+        print(f"Loss: {loss}, Accuracy: {accuracy}")
+        
+        return loss, accuracy
+    
     def plot_loss_accuracy(self):
         plt.figure(figsize=(10, 5))
         plt.subplot(1, 2, 1)
@@ -135,115 +148,43 @@ num_classes = len(np.unique(labels))
 one_hot_labels = np.eye(num_classes)[label_ids]
 
 # Разделение данных на обучающий, валидационный и тестовый наборы
-X_train_val, X_test, y_train_val, y_test = train_test_split(pixel_matrices, one_hot_labels, test_size=0.2, random_state=42)
-X_train, X_val, y_train, y_val = train_test_split(X_train_val, y_train_val, test_size=0.25, random_state=42)  # 0.25 * 0.8 = 0.2
+X_train_val, X_test, y_train_val, y_test = train_test_split(pixel_matrices, one_hot_labels, test_size=0.2, random_state=1234)
+X_train, X_val, y_train, y_val = train_test_split(X_train_val, y_train_val, test_size=0.25, random_state=1234)  # 0.25 * 0.8 = 0.2
 
 
-# Создание экземпляра нейронной сети
+# Сетка
 input_size = 32 * 32  # размер вектора пикселей
-hidden_size = 10  # количество нейронов в скрытом слое
-output_size = num_classes  # количество классов (ваша переменная)
+hidden_size = 16  # количество нейронов в скрытом слое
+output_size = num_classes  # количество классов 
 
 nn = NeuralNetwork(input_size, hidden_size, output_size)
 
 # Обучение нейронной сети на обучающем наборе
 epochs = 2000
-learning_rate = 0.04
+learning_rate = 0.02
 
 nn.train(X_train, y_train, epochs, learning_rate)
 
 # Оценка производительности на валидационном наборе
-val_loss = np.mean(np.square(y_val - nn.forward(X_val)))
-print(f"Validation Loss: {val_loss}")
+print("Оценка производительности на валидационном наборе:")
+val_loss, val_accuracy = nn.evaluate(X_val, y_val)
 
 # Оценка производительности на тестовом наборе
-test_loss = np.mean(np.square(y_test - nn.forward(X_test)))
-print(f"Test Loss: {test_loss}")
+print("Оценка производительности на тестовом наборе:")
+test_loss, test_accuracy = nn.evaluate(X_test, y_test)
+
+# # Оценка производительности на валидационном наборе
+# val_loss = np.mean(np.square(y_val - nn.forward(X_val)))
+# print(f"Validation Loss: {val_loss}")
+
+# # Оценка производительности на тестовом наборе
+# test_loss = np.mean(np.square(y_test - nn.forward(X_test)))
+# print(f"Test Loss: {test_loss}")
 
 
-
-
-
-# def recognize():
-#     # Получаем изображение с холста и сохраняем его в формате PNG
-#     canvas_image = canvas.postscript(colormode='color')
-#     img = Image.open(io.BytesIO(canvas_image.encode('utf-8')))
-#     img = img.resize((32, 32))  # изменяем размер изображения до 32x32 пикселей
-#     img = ImageOps.grayscale(img)  # преобразуем изображение в черно-белое
-    
-#     # Преобразуем изображение в вектор пикселей
-#     pixel_vector = np.array(img).flatten()  # нормализуем значения пикселей
-    
-#     for i in range(len(pixel_vector)):
-#         if pixel_vector[i] > 128:
-#             pixel_vector[i] = 0
-#         else:
-#             pixel_vector[i] = 1
-    
-#     # print(pixel_vector[:500])
-    
-#     # Отправляем вектор пикселей на распознавание в нейронную сеть
-#     output = nn.forward(pixel_vector)
-    
-#     # Получаем предсказание числовного класса символа
-#     predicted_class = np.argmax(output)
-    
-#     # Получаем метку класса по числовому значению из словаря
-#     predicted_label = id_to_label[predicted_class]
-    
-#     # Отображаем предсказание пользователю
-#     print(f"Распознанный символ: {predicted_label}")
-
-# def recognize():
-#     # Получаем изображение с холста и сохраняем его в формате PNG
-#     canvas_image = canvas.postscript(colormode='color')
-#     img = Image.open(io.BytesIO(canvas_image.encode('utf-8')))
-    
-#     # Преобразуем изображение в оттенки серого
-#     img = ImageOps.grayscale(img)
-    
-#     # Инвертируем цвета, чтобы символ был белым на черном фоне
-#     img = ImageOps.invert(img)
-    
-#     # Находим границы нарисованного символа с отступом
-#     bbox = img.getbbox()
-    
-#     # # Обрезаем изображение по границам символа с отступом
-#     # img = img.crop(bbox)
-    
-#     # img.save('cropped_image.png')
-    
-#     # # Изменяем размер изображения до 32x32 пикселей
-#     # img = img.resize((32, 32))
-    
-#     img.save('cropped_image_resized.png')
-    
-    
-#     # Преобразуем изображение в вектор пикселей
-#     pixel_vector = np.array(img).flatten()
-    
-#     # Нормализуем значения пикселей
-#     # pixel_vector = pixel_vector / 255.0
-#     # print(pixel_vector[:500])
-#     for i in range(len(pixel_vector)):
-#         if pixel_vector[i] > 128:
-#             pixel_vector[i] = 1
-#         else:
-#             pixel_vector[i] = 0
-    
-#     # Пропускаем вектор пикселей через нейронную сеть
-#     output = nn.forward(pixel_vector)
-    
-#     # Получаем предсказание числовного класса символа
-#     predicted_class = np.argmax(output)
-    
-#     # Получаем метку класса по числовому значению из словаря
-#     predicted_label = id_to_label[predicted_class]
-    
-#     # Отображаем предсказание пользователю
-#     print(f"Распознанный символ: {predicted_label}")
 
 def recognize():
+    predictionText.delete('1.0', 'end')
     # Получаем изображение с холста и сохраняем его в формате PNG
     canvas_image = canvas.postscript(colormode='color')
     img = Image.open(io.BytesIO(canvas_image.encode('utf-8')))
@@ -266,7 +207,7 @@ def recognize():
     offset_y = (32 - new_height) // 2
     
     # Добавляем отступы к обрезанному изображению
-    bbox_with_padding = (bbox[0] - 10, bbox[1] - 10, bbox[2] + 10, bbox[3] + 10)
+    bbox_with_padding = (bbox[0] - 7, bbox[1] - 7, bbox[2] + 7, bbox[3] + 7)
     
     # Обрезаем и изменяем размер изображения с учетом отступов
     img_cropped_resized = img.crop(bbox_with_padding).resize((new_width, new_height))
@@ -283,7 +224,7 @@ def recognize():
     
     # Нормализуем значения пикселей
     for i in range(len(pixel_vector)):
-         if pixel_vector[i] > 128:
+         if pixel_vector[i] > 127:
              pixel_vector[i] = 0
          else:
              pixel_vector[i] = 1
@@ -297,12 +238,13 @@ def recognize():
     # Получаем метку класса по числовому значению из словаря
     predicted_label = id_to_label[predicted_class]
     
-    # Отображаем предсказание пользователю
+    # Отображаем предсказание 
     print(f"Распознанный символ: {predicted_label}")
+    predictionText.insert("1.0", predicted_label)
     
 # Подготовка пользовательского интерфейса
 root = tk.Tk()
-root.title("Рисование символов")
+root.title("Symbol Recognition")
 
 canvas = tk.Canvas(root, width=400, height=400, bg='white')
 canvas.pack()
@@ -319,15 +261,25 @@ def clear_canvas():
 canvas.bind('<B1-Motion>', draw)
 
 recognize_button = tk.Button(root, text="Recognize", command=recognize)
-recognize_button.pack()
+recognize_button.pack(side = 'left')
+
 
 # Кнопка для очистки холста
 clear_button = tk.Button(root, text="Clear", command=clear_canvas)
-clear_button.pack(side="left")
+clear_button.pack(side = 'right')
 
 # Ползунок для изменения ширины кисти
-brush_size = tk.Scale(root, from_=1, to=15, orient="horizontal", label="Width")
+brush_size = tk.Scale(root, from_=1, to=10, orient="horizontal", label="Width")
+brush_size.set(5)
 brush_size.pack()
+
+predictionText = tk.Text(root, height=1, width=10, )
+predictionText.pack()
+
+lossText = tk.Text(root, height=1, width=40, )
+lossText.pack(side='left')
+lossText.insert("1.0", f"Test loss: {np.around(test_loss, 3)}, Test accuracy: {np.around(test_accuracy, 3)}")
+
 
 root.mainloop()
 
