@@ -29,8 +29,8 @@ train_dataset, test_dataset = torch.utils.data.random_split(dataset, [train_size
 # Создание DataLoader для тренировочного и тестового датасетов
 train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
-classes = train_loader.dataset.classes
-print(classes)
+classes = train_loader.dataset
+
 
 
 class CNN(nn.Module):
